@@ -941,7 +941,9 @@ defmodule Req.Steps do
         end
 
       request = Req.Request.put_new_header(request, "host", request.url.host)
-      headers = Req.Fields.drop(request.headers, @aws_sigv4_excluded_headers)
+      # Retries sign again; do not include the previous generated signing headers.
+      generated_headers = ["x-amz-content-sha256", "x-amz-date", "x-amz-security-token"]
+      headers = Req.Fields.drop(request.headers, @aws_sigv4_excluded_headers ++ generated_headers)
       headers = Req.Fields.get_list(headers)
 
       headers =
